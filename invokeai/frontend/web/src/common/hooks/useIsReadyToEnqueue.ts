@@ -1,11 +1,7 @@
 import { useStore } from '@nanostores/react';
 import { createMemoizedSelector } from 'app/store/createMemoizedSelector';
 import { useAppSelector } from 'app/store/storeHooks';
-import { selectControlAdaptersV2Slice } from 'features/controlLayers/store/controlAdaptersSlice';
 import { selectCanvasV2Slice } from 'features/controlLayers/store/canvasV2Slice';
-import { selectIPAdaptersSlice } from 'features/controlLayers/store/ipAdaptersSlice';
-import { selectLayersSlice } from 'features/controlLayers/store/layersSlice';
-import { selectRegionalGuidanceSlice } from 'features/controlLayers/store/regionalGuidanceSlice';
 import type { CanvasEntity } from 'features/controlLayers/store/types';
 import { selectDynamicPromptsSlice } from 'features/dynamicPrompts/store/dynamicPromptsSlice';
 import { getShouldProcessPrompt } from 'features/dynamicPrompts/util/getShouldProcessPrompt';
@@ -39,30 +35,12 @@ const createSelector = (templates: Templates) =>
       selectWorkflowSettingsSlice,
       selectDynamicPromptsSlice,
       selectCanvasV2Slice,
-      selectLayersSlice,
-      selectControlAdaptersV2Slice,
-      selectRegionalGuidanceSlice,
-      selectIPAdaptersSlice,
-      activeTabNameSelector,
       selectUpscalelice,
+      activeTabNameSelector,
     ],
-    (
-      generation,
-      system,
-      nodes,
-      workflowSettings,
-      dynamicPrompts,
-      canvasV2,
-      layersState,
-      controlAdaptersState,
-      regionalGuidanceState,
-      ipAdaptersState,
-      activeTabName,
-      upscale
-    ) => {
-      const { model } = generation;
-      const { size } = canvasV2;
-      const { positivePrompt } = canvasV2.prompts;
+    (generation, system, nodes, workflowSettings, dynamicPrompts, canvasV2, upscale, activeTabName) => {
+      const { model, positivePrompt } = generation;
+      const { bbox } = canvasV2;
 
       const { isConnected } = system;
 
@@ -136,7 +114,7 @@ const createSelector = (templates: Templates) =>
           reasons.push({ content: i18n.t('parameters.invoke.noModelSelected') });
         }
 
-        controlAdaptersState.controlAdapters
+        canvasV2.controlAdapters
           .filter((ca) => ca.isEnabled)
           .forEach((ca, i) => {
             const layerLiteral = i18n.t('controlLayers.layers_one');
@@ -161,7 +139,7 @@ const createSelector = (templates: Templates) =>
             // T2I Adapters require images have dimensions that are multiples of 64 (SD1.5) or 32 (SDXL)
             if (!ca.controlMode) {
               const multiple = model?.base === 'sdxl' ? 32 : 64;
-              if (size.width % multiple !== 0 || size.height % multiple !== 0) {
+              if (bbox.width % multiple !== 0 || bbox.height % multiple !== 0) {
                 problems.push(i18n.t('parameters.invoke.layer.t2iAdapterIncompatibleDimensions', { multiple }));
               }
             }
@@ -172,7 +150,7 @@ const createSelector = (templates: Templates) =>
             }
           });
 
-        ipAdaptersState.ipAdapters
+        canvasV2.ipAdapters
           .filter((ipa) => ipa.isEnabled)
           .forEach((ipa, i) => {
             const layerLiteral = i18n.t('controlLayers.layers_one');
@@ -200,7 +178,7 @@ const createSelector = (templates: Templates) =>
             }
           });
 
-        regionalGuidanceState.regions
+        canvasV2.regions
           .filter((rg) => rg.isEnabled)
           .forEach((rg, i) => {
             const layerLiteral = i18n.t('controlLayers.layers_one');
@@ -237,7 +215,7 @@ const createSelector = (templates: Templates) =>
             }
           });
 
-        layersState.layers
+        canvasV2.layers
           .filter((l) => l.isEnabled)
           .forEach((l, i) => {
             const layerLiteral = i18n.t('controlLayers.layers_one');
