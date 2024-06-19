@@ -166,7 +166,7 @@ const createSelector = (templates: Templates) =>
               problems.push(i18n.t('parameters.invoke.layer.ipAdapterIncompatibleBaseModel'));
             }
             // Must have an image
-            if (!ipa.image) {
+            if (!ipa.imageObject) {
               problems.push(i18n.t('parameters.invoke.layer.ipAdapterNoImageSelected'));
             }
 
@@ -202,7 +202,7 @@ const createSelector = (templates: Templates) =>
                 problems.push(i18n.t('parameters.invoke.layer.ipAdapterIncompatibleBaseModel'));
               }
               // Must have an image
-              if (!ipAdapter.image) {
+              if (!ipAdapter.imageObject) {
                 problems.push(i18n.t('parameters.invoke.layer.ipAdapterNoImageSelected'));
               }
             });
